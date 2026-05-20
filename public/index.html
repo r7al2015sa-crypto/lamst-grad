@@ -585,22 +585,18 @@ async function renderCanvas(){
   ctx.beginPath(); ctx.moveTo(100,nameAreaY-20); ctx.lineTo(W-100,nameAreaY-20); ctx.stroke();
 
   // الاسم الأول كبير وبولد
-  txt(S.firstName, cx, nameAreaY+20, {size:58,color:'#ffffff',weight:'700',family:'GE SS Two,Tajawal,sans-serif'});
+  const fnameY = nameAreaY+20;
+  txt(S.firstName, cx, fnameY, {size:58,color:'#ffffff',weight:'700',family:'GE SS Two,Tajawal,sans-serif'});
 
-  // اسم الأب والجد
-  if(S.lastName) txt(S.lastName, cx, nameAreaY+82, {size:26,color:'rgba(215,189,226,.85)',weight:'400'});
+  // اسم الأب — 72px تحت الاسم الرئيسي (بدون تداخل)
+  if(S.lastName) txt(S.lastName, cx, fnameY+72, {size:26,color:'rgba(215,189,226,.85)',weight:'400'});
 
-  // فاصل
+  // فاصل بعد اسم الأب
   ctx.strokeStyle=lg2; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(100,nameAreaY+110); ctx.lineTo(W-100,nameAreaY+110); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(100,fnameY+108); ctx.lineTo(W-100,fnameY+108); ctx.stroke();
 
-  // لا جوال
-  if(S.noPhone){
-    txt('📵 يُمنع الجوال والكاميرا في الحفل', cx, H*0.92, {size:18,color:'rgba(215,189,226,.7)'});
-  }
-
-  // @lamst_design
-  txt('@lamst_design', cx, H*0.96, {size:18,color:'rgba(155,89,182,.8)',family:"'GE SS Two',sans-serif"});
+  // @lamst_design ثابت في أسفل الكانفاس
+  txt('@lamst_design', cx, H*0.967, {size:18,color:'rgba(155,89,182,.8)',family:"'GE SS Two',sans-serif"});
 
   load.style.display='none'; canvas.style.display='block';
 }
