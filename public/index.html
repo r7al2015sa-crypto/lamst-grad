@@ -287,13 +287,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--ge);min-height:100
       <input type="text" id="majorEn" class="input" placeholder="Dentistry" style="direction:ltr;text-align:right">
     </div>
 
-    <div class="field" style="margin-top:18px">
-      <div class="checkbox" onclick="toggleNoPhone()">
-        <div class="cbox" id="noPhoneBox"></div>
-        <div class="cbox-label">📵 يُمنع اصطحاب الجوال والكاميرا في الحفل</div>
-      </div>
-    </div>
-
     <button class="btn" onclick="toStep2()" style="margin-top:20px">معاينة التهنئة ✦</button>
   </div>
 </div>
@@ -543,60 +536,53 @@ async function renderCanvas(){
     ctx.shadowBlur=0; ctx.shadowOffsetY=0;
   }
 
-  // النصوص — تبدأ من H*0.52 (المنطقة السوداء)
-  const startY = H*0.52;
+  // ══ توزيع ذكي يملأ المساحة السوداء كاملاً ══
+  const GE = "'GE SS Two','Tajawal',sans-serif";
+  const topY  = H*0.51;   // بداية النصوص
+  const botY  = H*0.962;  // نهاية (@lamst_design)
+  const totalH = botY - topY;
 
-  // الحمد لله
-  txt('الحمد لله الذي يسر البدايات', cx, startY, {size:22,color:'rgba(255,255,255,.8)',family:'Amiri,serif',weight:'700'});
-  txt('وأكمل النهايات وبلغنا الغايات', cx, startY+34, {size:22,color:'rgba(255,255,255,.8)',family:'Amiri,serif',weight:'700'});
-
-  // فاصل ذهبي
-  const lg=ctx.createLinearGradient(0,0,W,0);
-  lg.addColorStop(0,'transparent'); lg.addColorStop(.5,'rgba(201,169,97,.6)'); lg.addColorStop(1,'transparent');
-  ctx.strokeStyle=lg; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(80,startY+58); ctx.lineTo(W-80,startY+58); ctx.stroke();
-
-  // "تم بفضل الله وتوفيقه تخرجي من"
-  txt('تم بفضل الله وتوفيقه تخرجي من', cx, startY+82, {size:20,color:'rgba(255,255,255,.75)'});
-
-  // اسم الجامعة
-  if(S.university) txt(S.university, cx, startY+116, {size:26,color:'#D7BDE2',weight:'700'});
-
-  // الدرجة
-  if(S.degree && S.degree!=='بدون'){
-    txt('بدرجة '+S.degree, cx, startY+152, {size:20,color:'rgba(255,255,255,.7)'});
-  }
-
-  // "في تخصص"
+  // بناء قائمة العناصر
+  const items = [];
+  items.push({t:'text', v:'الحمد لله الذي يسر البدايات',    size:21, color:'rgba(255,255,255,.85)', weight:'600', f:GE});
+  items.push({t:'text', v:'وأكمل النهايات وبلغنا الغايات',  size:21, color:'rgba(255,255,255,.85)', weight:'600', f:GE});
+  items.push({t:'line', color:'rgba(201,169,97,.5)'});
+  items.push({t:'text', v:'تم بفضل الله وتوفيقه تخرجي من', size:19, color:'rgba(255,255,255,.72)', f:GE});
+  if(S.university) items.push({t:'text', v:S.university, size:27, color:'#D7BDE2', weight:'700', f:GE});
+  if(S.degree && S.degree!=='بدون') items.push({t:'text', v:'بدرجة '+S.degree, size:19, color:'rgba(255,255,255,.68)', f:GE});
   if(S.major){
-    txt('في تخصص', cx, startY+(S.degree&&S.degree!=='بدون'?186:160), {size:20,color:'rgba(255,255,255,.7)'});
-    const majorY = startY+(S.degree&&S.degree!=='بدون'?216:190);
-    txt(S.major, cx, majorY, {size:24,color:'#D7BDE2',weight:'600'});
-    if(S.majorEn){
-      txt(S.majorEn, cx, majorY+32, {size:18,color:'rgba(215,189,226,.6)',family:'GE SS Two,Tajawal,sans-serif'});
-    }
+    items.push({t:'text', v:'في تخصص', size:19, color:'rgba(255,255,255,.68)', f:GE});
+    items.push({t:'text', v:S.major, size:25, color:'#D7BDE2', weight:'700', f:GE});
+    if(S.majorEn) items.push({t:'text', v:S.majorEn, size:17, color:'rgba(215,189,226,.55)', f:GE});
   }
+  items.push({t:'line', color:'rgba(155,89,182,.5)'});
+  items.push({t:'text', v:S.firstName, size:60, color:'#ffffff', weight:'700', f:GE});
+  if(S.lastName) items.push({t:'gap'}); // مسافة إضافية
+  if(S.lastName) items.push({t:'text', v:S.lastName, size:25, color:'rgba(215,189,226,.85)', f:GE});
+  items.push({t:'line', color:'rgba(155,89,182,.4)'});
+  items.push({t:'text', v:'@lamst_design', size:18, color:'rgba(155,89,182,.8)', f:GE});
 
-  // فاصل
-  const lg2=ctx.createLinearGradient(0,0,W,0);
-  lg2.addColorStop(0,'transparent'); lg2.addColorStop(.5,'rgba(155,89,182,.5)'); lg2.addColorStop(1,'transparent');
-  ctx.strokeStyle=lg2; ctx.lineWidth=1;
-  const nameAreaY = H*0.76;
-  ctx.beginPath(); ctx.moveTo(100,nameAreaY-20); ctx.lineTo(W-100,nameAreaY-20); ctx.stroke();
+  // توزيع المسافات بالتساوي
+  const step = totalH / (items.length + 1);
+  let cy = topY + step;
 
-  // الاسم الأول كبير وبولد
-  const fnameY = nameAreaY+20;
-  txt(S.firstName, cx, fnameY, {size:58,color:'#ffffff',weight:'700',family:'GE SS Two,Tajawal,sans-serif'});
+  const lgG=ctx.createLinearGradient(0,0,W,0);
+  lgG.addColorStop(0,'transparent'); lgG.addColorStop(.5,'#aaa'); lgG.addColorStop(1,'transparent');
 
-  // اسم الأب — 72px تحت الاسم الرئيسي (بدون تداخل)
-  if(S.lastName) txt(S.lastName, cx, fnameY+72, {size:26,color:'rgba(215,189,226,.85)',weight:'400'});
-
-  // فاصل بعد اسم الأب
-  ctx.strokeStyle=lg2; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(100,fnameY+108); ctx.lineTo(W-100,fnameY+108); ctx.stroke();
-
-  // @lamst_design ثابت في أسفل الكانفاس
-  txt('@lamst_design', cx, H*0.967, {size:18,color:'rgba(155,89,182,.8)',family:"'GE SS Two',sans-serif"});
+  for(const item of items){
+    if(item.t==='line'){
+      const lc=ctx.createLinearGradient(0,0,W,0);
+      lc.addColorStop(0,'transparent'); lc.addColorStop(.5,item.color); lc.addColorStop(1,'transparent');
+      ctx.strokeStyle=lc; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(80,cy); ctx.lineTo(W-80,cy); ctx.stroke();
+    } else if(item.t==='gap'){
+      cy += step*0.4;
+      continue;
+    } else {
+      txt(item.v, cx, cy, {size:item.size||22, color:item.color||'#fff', weight:item.weight||'400', family:item.f||GE});
+    }
+    cy += step;
+  }
 
   load.style.display='none'; canvas.style.display='block';
 }
